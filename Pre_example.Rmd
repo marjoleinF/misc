@@ -1,0 +1,76 @@
+# Example of a prediction rule ensemble (pre) for predicting depression
+
+Load packages:
+
+```{r}
+#library(devtools)
+#install_github("marjoleinF/pre")
+library(pre)
+library(foreign)
+library(party)
+```
+
+Load dataset:
+
+```{r}
+cardata <- read.spss("data Carillo et al.sav", to.data.frame = TRUE)
+set.seed(42)
+train <- sample(1:112, 80)
+```
+
+### Fit a prediction rule ensemble. 
+
+We will select the final ensemble yielding a cross-validation error within 1 standard error of the minimum:
+
+```{r}
+carpre <- pre(bdi ~ ., data = cardata[train,])
+print(carpre, penalty.par.val = "lambda.1se")
+importance(carpre, round = 4, penalty.par.val = "lambda.1se")$baseimps
+prepreds <- predict(carpre, newdata = cardata[-train,], )
+```
+
+The ensemble is composed of 5 rules, involving 6 predictor variables. 
+
+### Visual inspection of the effects of single or pairs of predictor variables on the predictions
+
+```{r}
+singleplot(carpre, "n4")
+pairplot(carpre, c("n3", "open4"), nticks = 6, theta = 240)
+```
+  
+
+### Comparison with single tree, linear model and random forest
+
+Let's compare the predictive accuracy on test data with that of a single tree, a linear model and a random forest:
+
+```{r}
+cartree <- ctree(bdi ~ ., data = cardata[train,])
+carlm <- lm(bdi ~ ., data = cardata[train,])
+carforest <- party::cforest(bdi ~ ., data = cardata[train,])
+lmpreds <- predict(carlm, newdata = cardata[-train,])
+treepreds <- predict(cartree, newdata = cardata[-train,])
+forestpreds <- predict(carforest, newdata = cardata[-train,])
+cor(cbind(treepreds = treepreds[,1], lmpreds = lmpreds, prepreds = prepreds, forestpreds = forestpreds[,1], y = cardata$bdi[-train]))
+```
+
+The pre outperforms the linear model and the tree, but is outperformed by the random forest. Let's compare the amount of information every method needs to make a prediction:
+
+```{r}
+plot(cartree)
+party::varimp(carforest)
+coef(carlm)
+```
+
+The pre used 6 predictor variables for making a prediction, the tree uses 2, whereas the linear model and the random forest use the values of all 26 predictor variables.
+
+### Assessing predictor variable interactions and cross-validated error (computationally intensive)
+
+```{r, eval = FALSE}
+carinteract <- interact(carpre)
+carnullmods <- bsnullinteract(carpre)
+carinteract.bs <- interact(carpre, nullmods = carnullmods)
+legend("topleft", c("observed", "bs null model mean"), bty = "n", col = c("yellow", "blue"), pch = 15)
+round(carinteract.bs$trainingH2, digits = 3)
+round(sapply(carinteract.bs$nullH2, mean), digits = 3)
+round(sapply(interact.bs$nullH2, sd), digits = 3)
+```

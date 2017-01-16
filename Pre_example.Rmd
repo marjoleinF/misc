@@ -58,6 +58,7 @@ The pre outperforms the linear model and the tree, but is outperformed by the ra
 ```{r}
 plot(cartree)
 party::varimp(carforest)
+detach("package:party", unload = TRUE)
 coef(carlm)
 ```
 
@@ -69,7 +70,7 @@ The pre used 6 predictor variables for making a prediction, the tree uses 2, whe
 carinteract <- interact(carpre)
 carnullmods <- bsnullinteract(carpre)
 carinteract.bs <- interact(carpre, nullmods = carnullmods)
-legend("topleft", c("observed", "bs null model mean"), bty = "n", col = c("yellow", "blue"), pch = 15)
+legend("topright", c("observed", "bs null model mean"), bty = "n", col = c("yellow", "blue"), pch = 15)
 round(carinteract.bs$trainingH2, digits = 3)
 round(sapply(carinteract.bs$nullH2, mean), digits = 3)
 round(sapply(interact.bs$nullH2, sd), digits = 3)

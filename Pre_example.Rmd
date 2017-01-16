@@ -1,4 +1,4 @@
-# Example of a prediction rule ensemble (pre) for predicting depression
+# Fitting a prediction rule ensemble (pre) for predicting depression
 
 Load packages:
 
@@ -7,7 +7,6 @@ Load packages:
 #install_github("marjoleinF/pre")
 library(pre)
 library(foreign)
-library(party)
 ```
 
 Load dataset:
@@ -18,12 +17,12 @@ set.seed(42)
 train <- sample(1:112, 80)
 ```
 
-### Fit a prediction rule ensemble. 
+#### Fit a prediction rule ensemble. 
 
 We will select the final ensemble yielding a cross-validation error within 1 standard error of the minimum:
 
 ```{r}
-carpre <- pre(bdi ~ ., data = cardata[train,])
+carpre <- pre(bdi ~ ., data = cardata[train,], verbose = TRUE)
 print(carpre, penalty.par.val = "lambda.1se")
 importance(carpre, round = 4, penalty.par.val = "lambda.1se")$baseimps
 prepreds <- predict(carpre, newdata = cardata[-train,], )
@@ -31,7 +30,7 @@ prepreds <- predict(carpre, newdata = cardata[-train,], )
 
 The ensemble is composed of 5 rules, involving 6 predictor variables. 
 
-### Visual inspection of the effects of single or pairs of predictor variables on the predictions
+#### Visual inspection of the effects of single or pairs of predictor variables on the predictions
 
 ```{r}
 singleplot(carpre, "n4")
@@ -39,11 +38,12 @@ pairplot(carpre, c("n3", "open4"), nticks = 6, theta = 240)
 ```
   
 
-### Comparison with single tree, linear model and random forest
+#### Comparison with single tree, linear model and random forest
 
 Let's compare the predictive accuracy on test data with that of a single tree, a linear model and a random forest:
 
 ```{r}
+library(party)
 cartree <- ctree(bdi ~ ., data = cardata[train,])
 carlm <- lm(bdi ~ ., data = cardata[train,])
 carforest <- party::cforest(bdi ~ ., data = cardata[train,])
@@ -63,7 +63,7 @@ coef(carlm)
 
 The pre used 6 predictor variables for making a prediction, the tree uses 2, whereas the linear model and the random forest use the values of all 26 predictor variables.
 
-### Assessing predictor variable interactions and cross-validated error (computationally intensive)
+#### Assessing predictor variable interactions and cross-validated error (computationally intensive)
 
 ```{r, eval = FALSE}
 carinteract <- interact(carpre)

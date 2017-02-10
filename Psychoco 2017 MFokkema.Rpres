@@ -1,0 +1,150 @@
+pre 
+========================================================
+
+Prediction Rule Ensembles
+
+Psychoco 2017
+
+Marjolein Fokkema, Leiden University
+
+<style>
+.small-code pre code {
+  font-size: 1em;
+}
+</style>
+
+Load library and data
+========================================================
+class: small-code
+```{r}
+library(devtools)
+install_github("marjoleinF/pre")
+library(pre)
+library(foreign)
+cardata <- read.spss(
+  "https://github.com/marjoleinF/misc/raw/master/data Carillo et al.sav",
+  to.data.frame = TRUE)
+set.seed(42)
+train <- sample(1:112, 80)
+```
+
+
+Fitting a PRE
+========================================================
+class: small-code
+```{r}
+carpre <- pre(formula = bdi ~ ., data = cardata[train,], type = "both", maxdepth = 3, learnrate = .01, mtry = Inf, sampfrac = .5)
+```
+
+- Above, default settings are specified
+- To generate trees as a random forest:
+  - maxdepth = Inf
+  - learnrate = 0
+  - mtry = srtq(p)
+  - sampfrac = 1
+
+Some S3 methods
+========================================================
+class: small-code
+```{r}
+print(carpre)
+```
+
+```{r}
+coef(carpre)
+predict(carpre, newdata = cardata[-train,])
+```
+
+
+Importances
+========================================================
+class: small-code
+```{r}
+importance(carpre, round = 4, plot = FALSE)
+```
+
+Importances
+========================================================
+class: small-code
+```{r}
+imps <- importance(carpre)
+```
+
+2D partial dependence plot
+========================================================
+class: small-code
+```{r}
+singleplot(carpre, "n4")
+```
+
+3D partial dependence plot
+========================================================
+class: small-code
+```{r}
+pairplot(carpre, c("n3", "open4"), nticks = 6, theta = 240)
+```
+
+
+Assessing interactions
+========================================================
+class: small-code
+```{r}
+int1 <- interact(carpre)
+```
+  
+Assessing interactions
+========================================================
+class: small-code
+```{r}
+bsnullmods <- bsnullinteract(carpre, nsamp = 2)
+```
+  
+Assessing interactions
+========================================================
+class: small-code
+```{r}
+int2 <- interact(carpre, nullmods = bsnullmods)
+```
+
+What's next?
+========================================================
+<br>
+<br>
+- Reducing computation time
+- Plotting functions
+- Support for other outcomes than continuous and binary ones
+
+
+Haiku
+========================================================
+<br>
+Forest to branches
+
+prediction rule ensembles
+
+get it from GitHub
+<br>
+<br>
+<br>
+<br>
+<br>
+<small>
+[https://github.com/marjoleinF/pre](https://github.com/marjoleinF/pre)
+<br>
+<br>
+[https://cran.r-project.org/web/packages/pre/index.html](https://cran.r-project.org/web/packages/pre/index.html)
+</small>
+  
+Thank you for your attention!
+========================================================
+<br>
+References
+<br>
+<small>
+Fokkema, M., Smits, N., Kelderman, & Penninx, B.W.J.H. (2015). Connecting
+clinical and actuarial prediction with rule-based methods. Psychological Assessment, 27(2), 636-644.
+
+Friedman, J. H., & Popescu, B. E. (2008). Predictive learning via rule 	ensembles. The Annals of Applied Statistics, 2(3), 916-954.
+
+Meinshausen, N. (2010). Node harvest. The Annals of Applied Statistics, 4(4), 	2049-2072.
+

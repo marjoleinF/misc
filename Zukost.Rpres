@@ -1,0 +1,135 @@
+Prediction rule ensembles
+========================================================
+author: Marjolein Fokkema, Leiden University
+font-family:"calibri"
+
+<style>
+.small-code pre code {
+  font-size: 16pt;
+}
+</style>
+
+
+
+Fitting a PRE
+========================================================
+class: small-code
+```{r}
+library(pre)
+library(foreign)
+car_data <- read.spss("https://github.com/marjoleinF/misc/raw/master/data Carillo et al.sav", to.data.frame = TRUE)
+
+## Fit ensemble:
+set.seed(42)
+car_pre <- pre(formula = bdi ~ ., data = car_data, type = "both", sampfrac = 0.5, maxdepth = 3, mtry = Inf, learnrate = .01, ntrees = 500)
+```
+
+Above, defaut settings are specified. 
+
+Alternatively, we can generate the initial ensemble like a bagged ensemble or random forest:
+
+```{r, eval = FALSE}
+pre_bag <- pre(formula = bdi ~ ., data = car_data, maxdepth = Inf, learnrate = 0, mtry = Inf, sampfrac = 1) 
+
+pre_rf <- pre(formula = bdi ~ ., data = car_data, maxdepth = Inf, learnrate = 0, mtry = ncol(car_data)/3, sampfrac = 1)
+```
+
+
+
+
+Print method
+========================================================
+class: small-code
+
+```{r}
+print(car_pre)
+```
+
+
+Select smaller ensemble (1)
+========================================================
+class: small-code
+
+```{r}
+plot(car_pre$glmnet.fit)
+```
+
+Select smaller ensemble (2)
+========================================================
+class: small-code
+
+```{r}
+head(cbind(car_pre$glmnet.fit$nzero, car_pre$glmnet.fit$lambda))
+print(car_pre, penalty.par.val = 1.38)
+```
+
+
+Plot method (1)
+========================================================
+class: small-code
+
+```{r}
+plot(car_pre)
+```
+
+
+Plot method (2)
+========================================================
+class: small-code
+
+```{r}
+plot(car_pre, penalty.par.val = 1.38)
+```
+
+
+Other methods
+========================================================
+class: small-code
+
+```{r}
+head(coef(car_pre))
+predict(car_pre, newdata = car_data[1:10,])
+```
+
+```{r, eval = FALSE}
+set.seed(42)
+cvpre(car_pre)
+```
+
+
+Importances (1)
+========================================================
+class: small-code
+```{r}
+imps <- importance(car_pre, round = 4)
+```
+
+Importances (2)
+========================================================
+class: small-code
+```{r}
+imps$baseimps
+```
+
+Partial dependence plots (1)
+========================================================
+class: small-code
+```{r}
+singleplot(car_pre, "n4")
+```
+
+Partial dependence plots (2)
+========================================================
+class: small-code
+```{r}
+pairplot(car_pre, c("n3", "open4"), nticks = 6, theta = 240)
+```
+
+
+Interactions
+========================================================
+class: small-code
+```{r, eval = FALSE}
+nullmods = bsnullinteract(car_pre)
+interact(car_pre, nullmods = nullmods)
+```

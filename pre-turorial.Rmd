@@ -1,0 +1,109 @@
+---
+output:
+  pdf_document: default
+  html_document: default
+---
+# Fitting a prediction rule ensemble using R package pre
+
+### Load package and data
+
+First, we have to get the package from GitHub and install. Also, we have to get the example dataset, which is from a paper by Carillo et al. (2001) on predicting depression based on personality scales:
+
+```{r,eval = FALSE}
+library(devtools)
+install_github("marjoleinF/pre")
+```
+
+```{r}
+library(pre)
+library(foreign)
+car_data <- read.spss("https://github.com/marjoleinF/misc/raw/master/data Carillo et al.sav", to.data.frame = TRUE)
+names(car_data)
+```
+
+
+### Fit the ensemble
+
+To fit the prediction rule ensemble, we have to regress depression (bdi) on all other variables.
+
+```{r}
+set.seed(42)
+car_pre <- pre(formula = bdi ~ ., data = car_data)
+```
+
+Note we have to set the seed to be able to reproduce our results later. Above, defaut settings are used. Alternatively, we can generate the initial ensemble like a bagged ensemble or random forest:
+
+```{r, eval = FALSE}
+pre_bag <- pre(formula = bdi ~ ., data = car_data, maxdepth = Inf, learnrate = 0, mtry = Inf, sampfrac = 1) 
+pre_rf <- pre(formula = bdi ~ ., data = car_data, maxdepth = Inf, learnrate = 0, mtry = ncol(car_data)/3, sampfrac = 1)
+```
+
+
+### Inspect the ensemble
+
+We can check out the resulting prediction rule ensemble using the `print()` function:
+
+```{r}
+print(car_pre)
+```
+
+We may be willing to trade some predictive accuracy in order to have a smaller ensemble, of only four rules, for example:
+
+```{r}
+plot(car_pre$glmnet.fit)
+```
+
+Note that predictive accuracy will be much compromised in this case. To illustrate, we will use a very small ensemble here. Then we should get the value of the penalty parameter that gives us the desired number of terms:
+
+```{r}
+head(data.frame(number_of_nonzero_terms = car_pre$glmnet.fit$nzero, lambda = car_pre$glmnet.fit$lambda))
+print(car_pre, penalty.par.val = 1.72)
+```
+
+The smaller ensemble will give lower predictive accuracy on new observations, as the plot of the cross-validated mean squared error above indicates. Let's continue with the ensemble selected by default, and plot it:
+
+```{r}
+plot(car_pre)
+```
+
+We can generate predictions for new observations (though note that these observations are in fact not new, but were already used for training the ensemble):
+
+```{r}
+head(coef(car_pre))
+predict(car_pre, newdata = car_data[1:10,])
+```
+
+To obtain an estimate of future prediction error through k-fold cross validation:
+
+```{r}
+set.seed(42)
+cv_car1 <- cvpre(car_pre)
+cv_car2 <- cvpre(car_pre, penalty.par.val = 1.72)
+cv_car1$accuracy
+cv_car2$accuracy
+var(car_data$bdi)
+```
+
+We can get an estimate of the importance of variables and base learners using the `importance()` function.
+
+```{r}
+importance(car_pre, round = 4,)
+```
+
+Note that predictive accuracy would have been much better if we would have gone with the default `penalty.par.val = "lambda.1se"`.
+
+We can assess the effect of a single variable on the predictions of the ensemble using the `singleplot()` function:
+
+```{r}
+singleplot(car_pre, "n4")
+```
+
+We can assess the effect of pairs of variables on the predictions of the ensemble using the `pairplot()` function:
+
+```{r}
+pairplot(car_pre, c("n3", "open4"), nticks = 6, theta = 240)
+```
+
+### References
+
+Carrillo, J. M., Rojo, N., Sánchez-Bernardos, M. L., & Avia, M. D. (2001). Openness to experience and depression. European Journal of Psychological Assessment, 17(2), 130.

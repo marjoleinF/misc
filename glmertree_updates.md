@@ -1,10 +1,9 @@
 Convergence criterion and contrast coding
 =========================================
 
-The convergence check assumed that the log-likelihood value could only increase from one iteration to the next, but it may also decrease (which is quite likely if the tree size decreases from one iteration to the next). Below we see that with the former version of `glmertree`, estimation converged although the log-likelihood values are quite different:
+The convergence check assumed that the log-likelihood value could only increase from one iteration to the next. In the earlier version of **glmertree**, if the log-likelihood decreased (which is quite likely if the tree size decreases from one iteration to the next), estimation converged even though the log-likelihood values are quite different:
 
 ``` r
-library("glmertree", lib.loc = "C:/Users/fokkemam/Documents/R/win-library/3.5/glmertree/V1/")
 lt <- lmertree(depression ~ treatment | cluster | age + anxiety + duration,
                data = DepressionDemo, verbose = TRUE)
 ```
@@ -18,7 +17,7 @@ lt$iterations
 
     ## [1] 2
 
-This also causes the estimated coefficients from `lmtree` and `lmer` to differ:
+This yields differences between the estimated coefficients from `lmtree` and `lmer`:
 
 ``` r
 coef(lt$tree)
@@ -40,21 +39,29 @@ fixef(lt$lmer)
     ## .tree4:treatmentTreatment 2 .tree5:treatmentTreatment 2 
     ##                   0.5212592                  -4.5468855
 
-Furthermore, we see that the contrasts of `lmer` do not coincide with those of `lmtree`. `lmer` uses the default treatment coding, where the first level serves as a reference category for the intercepts in the other nodes. Better to estimate the intercept separately in each node. `lmtree` estimates a separate intercept for each node. Would be best if `lmer` and `lmtree` use identical coding.
+Also, the contrasts used by `lmtree` and `lmer` differ. `lmer` uses treatment coding, where the first level serves as a reference category for the intercepts in the other nodes, whereas `lmtree` estimates a separate intercept for each node.
 
-Both issues have been corrected in the current development version: For checking convergence, the absolute difference in log-likelihood values from one iteration to the next is checked in `(g)lmertree`:
+The convergence and coding issues are corrected in the current development version: For checking convergence, the absolute difference in log-likelihood values from one iteration to the next is checked in `(g)lmertree`:
 
 ``` r
-detach("package:glmertree", unload=TRUE)
-library("glmertree", lib.loc = "C:/Users/fokkemam/Documents/R/win-library/3.5/glmertree/V2/")
 lt <- lmertree(depression ~ treatment | cluster | age + anxiety + duration,
-               data = DepressionDemo)
+               data = DepressionDemo, verbose = TRUE)
+```
+
+    ## [1] "iteration "        "1"                 ": "               
+    ## [4] "-302.535181660114"
+    ## [1] "iteration "       "2"                ": "              
+    ## [4] "-310.58293589557"
+    ## [1] "iteration "       "3"                ": "              
+    ## [4] "-310.58293589557"
+
+``` r
 lt$iterations
 ```
 
     ## [1] 3
 
-We now have one additional iteration. This also produces identical estimates of `lmtree` and `lmer` in the last iteration:
+We now have one additional iteration, which yields identical estimates of `lmtree` and `lmer`:
 
 ``` r
 coef(lt$tree)
@@ -76,9 +83,9 @@ fixef(lt$lmer)
     ## .tree4:treatmentTreatment 2 .tree5:treatmentTreatment 2 
     ##                   0.5212592                  -4.5468855
 
-Also note that `(g)lmtree` and `(g)lmer` now use identical coding.
+Also, `lmtree` and `lmer` now use identical coding.
 
-Also, the `lmer` estimates are returned by the `coef` and `fixef` methods of `(g)lmertree` now:
+Also, the `coef` and `fixef` methods of `lmertree` now return the `lmer` estimates:
 
 ``` r
 fixef(lt)
@@ -98,6 +105,8 @@ coef(lt)
     ## 4    8.591409            0.5212592
     ## 5   11.087612           -4.5468855
 
+These changes have also been implemented for `glmertree`.
+
 Plotting
 ========
 
@@ -109,7 +118,7 @@ lt4 <- lmertree(depression ~ treatment + age | cluster | anxiety + duration,
 plot(lt4, which = "tree")
 ```
 
-![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-6-1.png)
+![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
 The wiggly lines may be somewhat counterintuitive, especially when partitioning growth curve models, e.g.:
 
@@ -120,18 +129,18 @@ lt.growth <- lmertree(form, cluster = person, data = GrowthCurveDemo)
 plot(lt.growth, which = "tree")
 ```
 
-![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
-So it could be helpful to allow for plotting fitted values based on the fixed-effects coefficients only. I wrote a new plotting function which uses an adjusted version of `node_bivplot` from **partykit**. For plotting the fitted values, it allows for assuming the random effects to be constant at the population mean (of 0) and the fixed effects to be constant at their sample means, through the following arguments:
+I wrote a new plotting function which uses an adjusted version of `node_bivplot` from **partykit**. For plotting the fitted values, it allows for assuming the random effects to be constant (at the population mean of 0) and the fixed effects to be constant (at their sample means), through the following arguments:
 
--   `fit.ranef`: character; "fixed" (default) or "varying". Only used when fitmean = TRUE. If "constant", fitted means will be calculated, with random effects fixed at the population mean of 0. If "varying", fitted means will also be based on the fitted random effects.
--   `fit.fixef`: character, "constant" (default) or "varying". Only used when fitmean = TRUE. If "constant", fitted means will be calculated, keeping the values of the other predictors in the (G)LM constant at their sample mean or majority value. If "varying", fitted means will also be based on the fitted effects of the remaining predictor variables
+-   `fit.ranef`: character; "fixed" (default) or "varying". Only used when `fitmean = TRUE`. If `"constant"`, fitted means will be calculated, with random effects fixed at the population mean of 0. If `"varying"`, fitted means will also be based on the fitted random effects.
+-   `fit.fixef`: character, `"constant"` (default) or `"varying"`. Only used when `fitmean = TRUE`. If `"constant"`, fitted means will be calculated, keeping the values of the other predictors in the (G)LM constant at their sample mean or majority value. If `"varying"`, fitted means will also be based on the fitted effects of the remaining predictor variables
 
 ``` r
 plot.lmertree2(lt.growth, which = "tree")
 ```
 
-![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
 The earlier default behavior (fitted values include variation due to random and fixed effects) can be requested as follows:
 
@@ -139,7 +148,7 @@ The earlier default behavior (fitted values include variation due to random and 
 plot.lmertree2(lt.growth, which = "tree", fit.ranef = "varying", fit.fixef = "varying")
 ```
 
-![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-11-1.png)
 
 We can also omit the fitted values:
 
@@ -147,23 +156,23 @@ We can also omit the fitted values:
 plot.lmertree2(lt.growth, which = "tree", fitmean = FALSE)
 ```
 
-![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-12-1.png)
 
-Or we can omit the observed values:
+Or omit the observed values:
 
 ``` r
 plot.lmertree2(lt.growth, which = "tree", observed = FALSE)
 ```
 
-![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-11-1.png)
+![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-13-1.png)
 
-Or we can only plot the coefficients:
+Or only plot the coefficients:
 
 ``` r
 plot.lmertree2(lt.growth, which = "tree", type = "simple")
 ```
 
-![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-12-1.png)
+![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-14-1.png)
 
 By specifying `which = "both"` or `which = "ranef"`, the (co)variances of the random effects would (also) be printed.
 
@@ -200,38 +209,7 @@ coef(gt) - coef(gt$tree)
     ## 4  0.02120499          -0.01067424
     ## 5  0.03967379          -0.09192917
 
-This may be, because ML estimation of the full `(g)lmer` model is not the same as `REML` estimation. And probably, estimating an `lmtree` with the random-effects predictions from `lmer` is closer to `REML` than to `ML` estimation:
-
-``` r
-lt2 <- lmertree(depression ~ treatment | cluster | age + anxiety + duration,
-                data = DepressionDemo, REML = FALSE)
-coef(lt2) - coef(lt2$tree) ## almost identical
-```
-
-    ##     (Intercept) treatmentTreatment 2
-    ## 3  4.440892e-15        -5.329071e-15
-    ## 4  0.000000e+00         1.110223e-16
-    ## 5 -1.776357e-15         1.776357e-15
-
-``` r
-coef(lt) - coef(lt$tree) ## almost identical
-```
-
-    ##     (Intercept) treatmentTreatment 2
-    ## 3 -6.217249e-15         1.776357e-15
-    ## 4  0.000000e+00         1.332268e-15
-    ## 5 -5.329071e-15         0.000000e+00
-
-``` r
-coef(lt) - coef(lt2) ## quite different
-```
-
-    ##    (Intercept) treatmentTreatment 2
-    ## 3  0.006544763         -0.008783044
-    ## 4 -0.001094779         -0.001869402
-    ## 5 -0.006019882          0.012403206
-
-My current best guess Perhaps this is because how we estimate the tree, with the random effects predictions as an offset, is more similar to REML than to ML estimation of a mixed-effects model.
+My current best guess is that Perhaps this is because how we estimate the tree, with the random effects predictions as an offset, is more similar to REML than to ML estimation of a mixed-effects model.
 
 E.g.:
 

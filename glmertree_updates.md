@@ -48,12 +48,9 @@ lt <- lmertree(depression ~ treatment | cluster | age + anxiety + duration,
                data = DepressionDemo, verbose = TRUE)
 ```
 
-    ## [1] "iteration "        "1"                 ": "               
-    ## [4] "-302.535181660114"
-    ## [1] "iteration "       "2"                ": "              
-    ## [4] "-310.58293589557"
-    ## [1] "iteration "       "3"                ": "              
-    ## [4] "-310.58293589557"
+    ## 'log Lik.' -302.5352 (df=10)
+    ## 'log Lik.' -310.5829 (df=8)
+    ## 'log Lik.' -310.5829 (df=8)
 
 ``` r
 lt$iterations
@@ -134,7 +131,9 @@ plot(lt.growth, which = "tree")
 I wrote a new plotting function which uses an adjusted version of `node_bivplot` from **partykit**. For plotting the fitted values, it allows for assuming the random effects to be constant (at the population mean of 0) and the fixed effects to be constant (at their sample means), through the following arguments:
 
 -   `fit.ranef`: character; "fixed" (default) or "varying". Only used when `fitmean = TRUE`. If `"constant"`, fitted means will be calculated, with random effects fixed at the population mean of 0. If `"varying"`, fitted means will also be based on the fitted random effects.
--   `fit.fixef`: character, `"constant"` (default) or `"varying"`. Only used when `fitmean = TRUE`. If `"constant"`, fitted means will be calculated, keeping the values of the other predictors in the (G)LM constant at their sample mean or majority value. If `"varying"`, fitted means will also be based on the fitted effects of the remaining predictor variables
+-   `fit.fixef`: character, `"constant"` (default) or `"varying"`. Only used when `fitmean = TRUE`. If `"constant"`, fitted means will be calculated, keeping the values of the other predictors in the (G)LM constant at their sample mean or majority value. If `"varying"`, fitted means will also be based on the fitted effects of the remaining predictor variables.
+
+The new function plots straight lines, by default:
 
 ``` r
 plot.lmertree2(lt.growth, which = "tree")
@@ -174,9 +173,9 @@ plot.lmertree2(lt.growth, which = "tree", type = "simple")
 
 ![](glmertree_updates_files/figure-markdown_github/unnamed-chunk-14-1.png)
 
-By specifying `which = "both"` or `which = "ranef"`, the (co)variances of the random effects would (also) be printed.
+By specifying `which = "both"` or `which = "ranef"`, the (co)variances of the random effects would (also) be printed in each of the terminal nodes.
 
-Function `plot.glmertree2` provides similar behavior. I have created separate documentation for the new plotting functions:
+Function `plot.glmertree2` provides similar behavior for `glmertree`s. The new function has separate documentation to explain the arguments:
 
 ``` r
 ?plot.lmertree2
@@ -209,9 +208,7 @@ coef(gt) - coef(gt$tree)
     ## 4  0.02120499          -0.01067424
     ## 5  0.03967379          -0.09192917
 
-My current best guess is that Perhaps this is because how we estimate the tree, with the random effects predictions as an offset, is more similar to REML than to ML estimation of a mixed-effects model.
-
-E.g.:
+My current best guess is that the approach of `(g)lmertree`, i.e., estimating the tree with the random effects predictions as an offset, is more similar to REML than to ML estimation of a mixed-effects model. And thus, the estimated coefficients of `lmertree` are identical to those of `lmer` with REML estimation (the default):
 
 ``` r
 ## Estimate coefficients as lmtree does in lmertree:
@@ -221,8 +218,6 @@ lm1 <- lm(depression ~ .tree + .tree:treatment - 1 + offset(.ranef),
 ## Estimate coefficients as lmer does in lmertree:
 lmm.REML <- lmer(depression ~ .tree + .tree:treatment - 1 + (1|cluster), 
                  data = lt$data)
-lmm.ML <- lmer(depression ~ .tree + .tree:treatment - 1 + (1|cluster), 
-               data = lt$data, REML = FALSE)
 coef(lm1) - fixef(lmm.REML) ## (nearly) identical 
 ```
 
@@ -233,7 +228,11 @@ coef(lm1) - fixef(lmm.REML) ## (nearly) identical
     ## .tree4:treatmentTreatment 2 .tree5:treatmentTreatment 2 
     ##               -3.330669e-15                2.664535e-15
 
+but not to those of `lmer` with ML estimation:
+
 ``` r
+lmm.ML <- lmer(depression ~ .tree + .tree:treatment - 1 + (1|cluster), 
+               data = lt$data, REML = FALSE)
 coef(lm1) - fixef(lmm.ML) ## somewhat different 
 ```
 
@@ -244,4 +243,4 @@ coef(lm1) - fixef(lmm.ML) ## somewhat different
     ## .tree4:treatmentTreatment 2 .tree5:treatmentTreatment 2 
     ##                -0.001869402                 0.012403206
 
-`glmer` does not support REML, only ML estimation. According to <http://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#reml-for-glmms>, it is unclear how to define the REML criterion in GLMMs. Perhaps because there are different ways to define the residuals with a binary respose.
+The larger differences between `glmer` and `glmtree` may then occur, because estimation of GLMMs is more complex altogether, and `glmer` does not support REML, only ML estimation. According to <http://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#reml-for-glmms>, it is unclear how to define the REML criterion in GLMMs. Perhaps because there are different ways to define the residuals with a binary respose.

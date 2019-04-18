@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Plotting (Generalized) Linear Mixed Model Trees</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for plot.glmertree2 {glmertree}"><tr><td>plot.glmertree2 {glmertree}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Plotting (Generalized) Linear Mixed Model Trees</h2>
+
+<h3>Description</h3>
+
+<p><code>plot</code> method for <code>(g)lmertree</code> objects.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+
+plot.lmertree2(x, which = "all", ask = TRUE, type = "extended", 
+    observed = TRUE, fitmean = TRUE, fit.ranef = "constant", fit.fixef = "constant", 
+    tp_args = list(), drop_terminal = TRUE, ...)
+
+plot.glmertree2(x, which = "all", ask = TRUE, type = "extended", 
+    observed = TRUE, fitmean = TRUE, fit.ranef = "constant", fit.fixef = "constant",
+    tp_args = list(), drop_terminal = TRUE, ...)
+</pre>
+
+
+<h3>Arguments</h3>
+
+<table summary="R argblock">
+<tr valign="top"><td><code>x</code></td>
+<td>
+<p>an object of class <code>lmertree</code> or <code>glmertree</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>which</code></td>
+<td>
+<p>character; <code>"all"</code> (default), <code>"tree"</code> or 
+<code>"random"</code>. Specifies whether, tree, random effects or both should
+be plotted.</p>
+</td></tr>
+<tr valign="top"><td><code>ask</code></td>
+<td>
+<p>logical. Should user be asked for input, before a new figure
+is drawn?</p>
+</td></tr>
+<tr valign="top"><td><code>type</code></td>
+<td>
+<p>character; <code>"extended"</code> (default) or <code>"simple"</code>.
+<code>"extended"</code> yields a plotted tree with observed data and/or
+fitted means in the terminal nodes; <code>"simple"</code> yields a plotted
+tree with fixed and/or random effects coefficients presented in the
+terminal nodes.</p>
+</td></tr>
+<tr valign="top"><td><code>observed</code></td>
+<td>
+<p>logical. Should observed datapoint be plotted?</p>
+</td></tr>
+<tr valign="top"><td><code>fitmean</code></td>
+<td>
+<p>logical. Should the fitted mean function be visualized? Only
+used when predictor variables for the node-specific (G)LMs are specified.</p>
+</td></tr>
+<tr valign="top"><td><code>fit.ranef</code></td>
+<td>
+<p>character; <code>"fixed"</code> (default) or <code>"varying"</code>.
+Only used when <code>fitmean = TRUE</code>. If <code>"constant"</code>, fitted values 
+will be calculated, with random effects fixed at their population 
+mean (0). If <code>"varying"</code>, fitted values will also be based on the
+fitted random effects.</p>
+</td></tr>
+<tr valign="top"><td><code>fit.fixef</code></td>
+<td>
+<p>character, <code>"constant"</code> (default) or <code>"varying"</code>. 
+Only used when <code>fitmean = TRUE</code>. If <code>"constant"</code>, fitted values
+will be calculated, keeping the values of the other predictors in the 
+(G)LM constant at their sample mean or majority value. If 
+<code>"varying"</code>, fitted values will also be based on the fitted effects 
+of the remaining predictor variables.</p>
+</td></tr> 
+<tr valign="top"><td><code>tp_args</code></td>
+<td>
+<p>list of arguments to be passed to panel generating function
+<code>node_glmertree</code>. See arguments <code>node_bivplot</code> in 
+<code><a href="../../partykit/html/panelfunctions.html">panelfunctions</a></code>.</p>
+</td></tr>
+<tr valign="top"><td><code>drop_terminal</code></td>
+<td>
+<p>logical. Should all terminal nodes be plotted at the 
+bottom?</p>
+</td></tr>
+<tr valign="top"><td><code>...</code></td>
+<td>
+<p>Additional arguments to be passed to <code>plot.party()</code>.
+See <code><a href="../../partykit/html/party-plot.html">party-plot</a></code> documentation for details.</p>
+</td></tr>
+</table>
+
+
+<h3>Details</h3>
+
+<p>The code is still under development and might change in future versions.
+</p>
+
+
+<h3>Value</h3>
+
+<p>The function returns a list with the following objects:
+</p>
+<table summary="R valueblock">
+<tr valign="top"><td><code>tree</code></td>
+<td>
+<p>The final <code>lmtree</code>/<code>glmtree</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>lmer</code></td>
+<td>
+<p>The final <code>lmer</code> random-effects model.</p>
+</td></tr>
+<tr valign="top"><td><code>ranef</code></td>
+<td>
+<p>The corresponding random effects of <code>lmer</code>.</p>
+</td></tr> 
+<tr valign="top"><td><code>varcorr</code></td>
+<td>
+<p>The corresponding <code>VarCorr(lmer)</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>variance</code></td>
+<td>
+<p>The corresponding <code>attr(VarCorr(lmer), "sc")^2</code>.</p>
+</td></tr>
+<tr valign="top"><td><code>data</code></td>
+<td>
+<p>The dataset specified with the <code>data</code> argument
+including added auxiliary variables <code>.ranef</code> and <code>.tree</code>
+from the last iteration.</p>
+</td></tr>
+<tr valign="top"><td><code>loglik</code></td>
+<td>
+<p>The log-likelihood value of the last iteration.</p>
+</td></tr>
+<tr valign="top"><td><code>iterations</code></td>
+<td>
+<p>The number of iterations used to estimate the <code>lmertree</code>.</p>
+</td></tr> 
+<tr valign="top"><td><code>maxit</code></td>
+<td>
+<p>The maximum number of iterations specified with the <code>maxit</code> argument.</p>
+</td></tr>
+<tr valign="top"><td><code>ranefstart</code></td>
+<td>
+<p>The random effects used as an offset, as specified with
+the <code>ranefstart</code> argument.</p>
+</td></tr>
+<tr valign="top"><td><code>formula</code></td>
+<td>
+<p>The formula as specified with the <code>formula</code> argument.</p>
+</td></tr>
+<tr valign="top"><td><code>randomformula</code></td>
+<td>
+<p>The formula as specified with the <code>randomformula</code> argument.</p>
+</td></tr>
+<tr valign="top"><td><code>abstol</code></td>
+<td>
+<p>The prespecified value for the change in log-likelihood to evaluate
+convergence, as specified with the <code>abstol</code> argument.</p>
+</td></tr> 
+<tr valign="top"><td><code>mob.control</code></td>
+<td>
+<p>A list containing control parameters passed to
+<code>lmtree()</code>, as specified with ....</p>
+</td></tr>
+<tr valign="top"><td><code>lmer.control</code></td>
+<td>
+<p>A list containing control parameters passed to
+<code>lmer()</code>, as specified in the <code>lmer.control</code> argument.</p>
+</td></tr>
+<tr valign="top"><td><code>joint</code></td>
+<td>
+<p>Whether the fixed effects from the tree were (re-)estimated jointly along 
+with the random effects, specified with the <code>joint</code> argument.</p>
+</td></tr>  
+</table>
+
+
+<h3>References</h3>
+
+<p>Fokkema M, Smits N, Zeileis A, Hothorn T, Kelderman H (2018).
+&ldquo;Detecting Treatment-Subgroup Interactions in Clustered Data
+with Generalized Linear Mixed-Effects Model Trees&rdquo;. Behavior Research 
+Methods, 50(5), 2016-2034. <a href="https://doi.org/10.3758/s13428-017-0971-x">https://doi.org/10.3758/s13428-017-0971-x</a>
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="glmertree.html">lmertree</a></code>, <code><a href="glmertree.html">glmertree</a></code>, 
+<code><a href="../../partykit/html/party-plot.html">party-plot</a></code>.</p>
+
+
+<h3>Examples</h3>
+
+<pre>
+
+## load artificial example data
+data("DepressionDemo", package = "glmertree")
+
+## fit normal linear regression LMM tree for continuous outcome
+lt &lt;- lmertree(depression ~ treatment + age | cluster | anxiety + duration,
+  data = DepressionDemo)
+plot.lmertree2(lt)
+plot.lmertree2(lt, type = "simple")
+plot.lmertree2(lt, which = "tree", fit.ranef = "constant", fit.fixef = "varying")
+plot.lmertree2(lt, which = "tree", fit.ranef = "varying", fit.fixef = "constant")
+plot.lmertree2(lt, which = "tree", fit.ranef = "varying", fit.fixef = "varying")
+
+## fit logistic regression GLMM tree for binary outcome
+gt &lt;- glmertree(depression_bin ~ treatment | cluster | 
+  age + anxiety + duration, data = DepressionDemo)
+plot.glmertree2(gt)
+plot.glmertree2(gt, type = "simple")
+plot.glmertree2(gt, which = "tree", fit.ranef = "constant", fit.fixef = "varying")
+plot.glmertree2(gt, which = "tree", fit.ranef = "varying", fit.fixef = "constant")
+plot.glmertree2(gt, which = "tree", fit.ranef = "varying", fit.fixef = "varying")
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>glmertree</em> version 0.1-3 <a href="00Index.html">Index</a>]</div>
+</body></html>

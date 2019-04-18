@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>R: Artificial depression treatment dataset</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="R.css" />
+</head><body>
+
+<table width="100%" summary="page for DepressionDemo {glmertree}"><tr><td>DepressionDemo {glmertree}</td><td style="text-align: right;">R Documentation</td></tr></table>
+
+<h2>Artificial depression treatment dataset</h2>
+
+<h3>Description</h3>
+
+<p>Simulated dataset of a randomized clinical trial (N = 150) to illustrate fitting 
+of (G)LMM trees.
+</p>
+
+
+<h3>Usage</h3>
+
+<pre>
+data("DepressionDemo")
+</pre>
+
+
+<h3>Format</h3>
+
+<p>A data frame containing 150 observations on 6 variables:
+</p>
+
+<dl>
+<dt>depression</dt><dd><p>numeric. Continuous treatment outcome variable 
+(range: 3-16, M = 9.12, SD = 2.66).</p>
+</dd>
+<dt>treatment</dt><dd><p>factor. Binary treatment variable.</p>
+</dd>
+<dt>cluster</dt><dd><p>factor. Indicator for cluster with 10 levels.</p>
+</dd>
+<dt>age</dt><dd><p>numeric. Continuous partitioning variable (range: 18-69, 
+M = 45, SD = 9.56).</p>
+</dd>
+<dt>anxiety</dt><dd><p>numeric. Continuous partitioning variable (range: 3-18, 
+M = 10.26, SD = 3.05).</p>
+</dd>
+<dt>duration</dt><dd><p>numeric. Continuous partitioning variable (range: 1-17, 
+M = 6.97, SD = 2.90).</p>
+</dd>
+<dt>depression_bin</dt><dd><p>factor. Binarized treatment outcome variable 
+(0 = recovered, 1 = not recovered).</p>
+</dd>
+</dl>
+
+
+<h3>Details</h3>
+
+<p>The data were generated such that the duration and anxiety covariates 
+characterized three subgroups with differences in treatment effects. The 
+<code>cluster</code> variable was used to introduce a random intercept that should 
+be accounted for. The treatment outcome is an index of depressive symptomatology. 
+</p>
+
+
+<h3>See Also</h3>
+
+<p><code><a href="glmertree.html">lmertree</a></code>, <code><a href="glmertree.html">glmertree</a></code></p>
+
+
+<h3>Examples</h3>
+
+<pre>
+
+data("DepressionDemo", package = "glmertree")
+summary(DepressionDemo)
+lt &lt;- lmertree(depression ~ treatment | cluster | anxiety + duration + age, 
+        data = DepressionDemo)
+plot(lt)
+gt &lt;- glmertree(depression_bin ~ treatment | cluster | anxiety + duration + age, 
+        data = DepressionDemo)
+plot(gt)
+
+</pre>
+
+<hr /><div style="text-align: center;">[Package <em>glmertree</em> version 0.1-3 <a href="00Index.html">Index</a>]</div>
+</body></html>

@@ -185,6 +185,10 @@ Updated vignette
 
 The original vignette only included an example on treatment-subgroup interactions. I get quite some emails from users who do not know how to specify other types of models for the nodes, so I have extended the vignette with two additional examples: one with constant fits in the terminal nodes and one with growth curve models in the terminal nodes. see:
 
+``` r
+vignette("glmertree", package = "glmertree")
+```
+
 Unresolved: Differences between fixef(glmer) and coef(glmtree)
 ==============================================================
 

@@ -155,14 +155,6 @@ fixef(lmt2$lmer)
 Plotting coefficients without tree
 ----------------------------------
 
-Current default:
-
-``` r
-plot(lmt1, which = "tree", gp = gpar(cex = .5))
-```
-
-![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-5-1.png)
-
 We could include option `which = "coef"`, in which case coefficients from the tree and random effects would be plotted. For tree coefficients, we can use `dotchart()` from base **`graphics`**, or `dotplot()` from **`lattice`**:
 
 ``` r
@@ -172,7 +164,7 @@ dotchart(coefs, labels = paste("node", rownames(coefs)),
          main = "Fixef effects from tree", cex= .7)
 ```
 
-![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-6-1.png)
+![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
 ``` r
 long_coefs <- data.frame(stack(data.frame(coefs)), 
@@ -183,7 +175,7 @@ lattice::dotplot(node ~ values | ind, data = long_coefs, as.table=TRUE,
                  main = "Fixed effects from tree")
 ```
 
-![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-6-2.png)
+![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-5-2.png)
 
 The latter may be preferred, as it provides the same plot style as for the random effects:
 
@@ -193,12 +185,12 @@ plot(lmt1, which = "ranef")
 
     ## $`PatientID:Study`
 
-![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-7-1.png)
+![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
     ## 
     ## $Study
 
-![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-7-2.png)
+![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-6-2.png)
 
 Although `dotplot()` introduces a dependency on **`lattice`**, this is already imported by **`lme4`** anyway.
 
@@ -208,25 +200,28 @@ Plotting tree
 ``` r
 lt.growth <- lmertree(y ~ time | person | x1 + x2 + x3 + x4 + x5, 
                       cluster = person, data = GrowthCurveDemo)
+lt.growth <- lmertree(y ~ time | (x6 + (1|person)) | x1 + x2 + x3 + x4 + x5, 
+                      cluster = person, data = GrowthCurveDemo)
+
 plot.lmertree2(lt.growth, type = "simple")
 ```
 
-![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 ``` r
 plot.lmertree2(lt.growth, fitmean = "none", which = "tree")
 ```
 
-![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
 ``` r
 plot.lmertree2(lt.growth, fitmean = "combined", which = "tree")
 ```
 
-![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-10-1.png)
+![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
 ``` r
 plot.lmertree2(lt.growth, fitmean = "marginal", which = "tree")
 ```
 
-![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-11-1.png)
+![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-10-1.png)

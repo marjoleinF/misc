@@ -12,20 +12,22 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## New convergence checks
 
-```{r}
+```{r, warning=FALSE, message=FALSE}
 library("glmertree")
 load(file = "ex_data.Rda")
 lt_form1 <- HAMD ~ time * Condition | (1|Study/PatientID) | Gender + 
   Age + Zanx + rawHAMDpre
-lmt1 <- lmertree(lt_form1, parm = 5:6, verbose = TRUE, 
-                 data = ex_data)
+lmt1 <- lmertree(lt_form1, parm = 5:6, verbose = TRUE, data = ex_data)
+```
+
+After the third iteration, stimation will start to go round in circles, and therefore is stopped after the third iteration. Perhaps we should print a warning, as the estimated coefficients from the `lmtree` and `lmer` will differ (see below).
+
+```{r}
 lmt2 <- lmertree(lt_form1, parm = 5:6, verbose = TRUE, maxdepth = 3L, 
                  data = ex_data)
 ```
 
-Note that in the first tree, estimation will start to go round in circles, and therefore is stopped after the third iteration. Perhaps we should print a warning, as the estimated coefficients from the `lmtree` and `lmer` will differ (see below).
-
-In the second tree, estimation converged normally.
+Here, estimation converged normally.
 
 
 ## Effects coding and fixef, coef methods
@@ -47,7 +49,7 @@ fixef(lmt2$lmer)
 ```
 
 
-## Plotting
+## Plotting coefficients without tree
 
 Current default:
 
@@ -59,9 +61,9 @@ We could include option `which = "coef"`, in which case coefficients from the tr
 
 ```{r}
 coefs <- coef(lmt1)
-dotchart(coefs, labels = paste("node", coefs),
+dotchart(coefs, labels = paste("node", rownames(coefs)),
          xlab = "Estimated coefficients",
-         main = "Fixef effects from tree")
+         main = "Fixef effects from tree", cex= .7)
 long_coefs <- data.frame(stack(data.frame(coefs)), 
                          node = rep(paste("node", rownames(coefs)), 
                                     times = ncol(coefs)))
@@ -80,23 +82,23 @@ Although `dotplot()` introduces a dependency on **`lattice`**, this is already i
 
 
 
-
+## Plotting tree
 
 ```{r}
 lt.growth <- lmertree(y ~ time | person | x1 + x2 + x3 + x4 + x5, 
                       cluster = person, data = GrowthCurveDemo)
-plot.lmertree2(lt.growth, type = "simple", terminal_panel = node_terminal_glmertree)
+plot.lmertree2(lt.growth, type = "simple")
 ```
 
 
 ```{r}
-plot.lmertree2(lt.growth, fitmean = "none")
+plot.lmertree2(lt.growth, fitmean = "none", which = "tree")
 ```
 
 ```{r}
-plot.lmertree2(lt.growth, fitmean = "combined")
+plot.lmertree2(lt.growth, fitmean = "combined", which = "tree")
 ```
 
 ```{r}
-plot.lmertree2(lt.growth, fitmean = "marginal")
+plot.lmertree2(lt.growth, fitmean = "marginal", which = "tree")
 ```

@@ -86,7 +86,7 @@ lt.growth <- lmertree(y ~ time | (x6 + (1|person)) | x1 + x2 + x3 + x4 + x5,
 ```
 
 ```{r}
-plot.lmertree2(lt.growth, type = "simple", main = 'type = "simple"')
+plot.lmertree2(lt.growth, type = "simple")
 ```
 
 ```{r}

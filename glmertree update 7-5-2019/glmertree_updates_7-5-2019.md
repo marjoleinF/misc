@@ -205,7 +205,7 @@ lt.growth <- lmertree(y ~ time | (x6 + (1|person)) | x1 + x2 + x3 + x4 + x5,
 ```
 
 ``` r
-plot.lmertree2(lt.growth, type = "simple", main = 'type = "simple"')
+plot.lmertree2(lt.growth, type = "simple")
 ```
 
 ![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-8-1.png)

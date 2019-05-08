@@ -30,7 +30,7 @@ Here, estimation converged normally.
 Effects coding and fixef, coef methods
 --------------------------------------
 
-I have undone the earlier changes to the coding `lmer` uses for the fixed effects. The `fixef` and `coef` methods for `(g)lmertree` are a bit tweaky now, but return the `(g)lmer` estimates, in the shape of the `(g)lmtree` `coef` method:
+I have reverted the earlier changes to the coding `lmer` uses for the fixed effects. The `fixef` and `coef` methods for `(g)lmertree` are a bit more tweaky now, but return the `(g)lmer` estimates, in the shape of the `(g)lmtree` `coef` method:
 
 ``` r
 coef(lmt1)
@@ -161,7 +161,7 @@ We could include option `which = "coef"`, in which case coefficients from the tr
 coefs <- coef(lmt1)
 dotchart(coefs, labels = paste("node", rownames(coefs)),
          xlab = "Estimated coefficients",
-         main = "Fixef effects from tree", cex= .7)
+         main = "Fixed effects from tree", cex= .7)
 ```
 
 ![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-5-1.png)

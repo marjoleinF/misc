@@ -161,7 +161,7 @@ We could include option `which = "coef"`, in which case coefficients from the tr
 coefs <- coef(lmt1)
 dotchart(coefs, labels = paste("node", rownames(coefs)),
          xlab = "Estimated coefficients",
-         main = "Fixed effects from tree", cex= .7)
+         main = "Fixed effects from tree", cex= .6)
 ```
 
 ![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-5-1.png)
@@ -202,26 +202,31 @@ lt.growth <- lmertree(y ~ time | person | x1 + x2 + x3 + x4 + x5,
                       cluster = person, data = GrowthCurveDemo)
 lt.growth <- lmertree(y ~ time | (x6 + (1|person)) | x1 + x2 + x3 + x4 + x5, 
                       cluster = person, data = GrowthCurveDemo)
-
-plot.lmertree2(lt.growth, type = "simple")
 ```
 
-![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-7-1.png)
-
 ``` r
-plot.lmertree2(lt.growth, fitmean = "none", which = "tree")
+plot.lmertree2(lt.growth, type = "simple", main = 'type = "simple"')
 ```
 
 ![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-8-1.png)
 
 ``` r
-plot.lmertree2(lt.growth, fitmean = "combined", which = "tree")
+plot.lmertree2(lt.growth, fitmean = "marginal", which = "tree",
+               main = 'fitmean = "marginal" (default behavior)')
 ```
 
 ![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
 ``` r
-plot.lmertree2(lt.growth, fitmean = "marginal", which = "tree")
+plot.lmertree2(lt.growth, fitmean = "none", which = "tree", 
+               main = 'fitmean = "none"')
 ```
 
 ![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-10-1.png)
+
+``` r
+plot.lmertree2(lt.growth, fitmean = "combined", which = "tree",
+               main = 'fitmean = "combined"')
+```
+
+![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-11-1.png)

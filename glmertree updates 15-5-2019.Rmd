@@ -1,6 +1,6 @@
 ---
 title: "glmertree updates"
-date: "7 May 2019"
+date: "15 May 2019"
 output: 
   md_document:
     variant: markdown_github
@@ -8,27 +8,8 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-## Convergence checks
-
-```{r, warning=FALSE, message=FALSE}
 library("glmertree")
-load(file = "ex_data.Rda")
-lt_form1 <- HAMD ~ time * Condition | (1|Study/PatientID) | Gender + 
-  Age + Zanx + rawHAMDpre
-lmt1 <- lmertree(lt_form1, parm = 5:6, verbose = TRUE, data = ex_data)
 ```
-
-After the third iteration, stimation will start to go round in circles, and therefore is stopped after the third iteration. Perhaps we should print a warning, as the estimated coefficients from the `lmtree` and `lmer` will differ (see below).
-
-```{r}
-lmt2 <- lmertree(lt_form1, parm = 5:6, verbose = TRUE, maxdepth = 3L, 
-                 data = ex_data)
-```
-
-Here, estimation converged normally.
-
 
 ## Global and local fixed effects
 
@@ -58,82 +39,29 @@ Separate documentation for these methods has now been included and can be access
 
 ## Plotting coefficients without tree structure
 
-Issue: The confidence intervals (CIs) are now calculated by taking $\pm 1.96 \times SE$ from the `(g)lmer` estimates. This is not a valid CI, but does give a measure of variability. I have pointed this out in the Details section of the help file, but many users may not read this. Should we point this out out in other ways / places (e.g., print warning when coefficients are plotted)? In addition, using a $z$ value of 1.96 may add additional optimism to these CIs. Should use $t$ values? Or plot error bars with coefficient estimates $\pm 1 \times SE$ (though this may be confusing, as the error bars of the `ranef` plots (from **`lme4`**) also use $\pm 1.96 \times SE$)?
-
-Issue: Because of the default treatment contrast coding, the intercepts of all terminal nodes, except the first, are the sum of the overal intercept and the terminal nodes' intercepts. 
-
-Issue: If `joint = FALSE`, how should standard errors be computed? Current default is to omit error bars if `joint = FALSE`. Alternatively, we could base them on the standard errors of the node-specific `(g)lm`s (I would expect these to have a downward bias). We could base them on the standard errors of the `(g)lmer`, which are also not really correct. Or we could keep the current default of not plotting them, and perhaps print a warning (if `joint=FALSE` and coefficients are plotted).
+### Default settings
 
 ```{r}
-## Default:
-lt1 <- lmertree(depression ~ treatment + age | cluster | anxiety + duration,
+lt <- lmertree(depression ~ treatment + age | cluster | anxiety + duration,
   data = DepressionDemo)
-plot.lmertree2(lt1, which = "tree.coef")
-plot.lmertree2(lt1, which = "ranef")
+plot.lmertree2(lt, which = "tree.coef")
+plot.lmertree2(lt, which = "ranef")
+```
 
-## No error bars when joint = FALSE:
-lt2 <- lmertree(depression ~ treatment + age | cluster | anxiety + duration,
+
+### No error bars when joint = FALSE
+
+```{r}
+lt <- lmertree(depression ~ treatment + age | cluster | anxiety + duration,
   data = DepressionDemo, joint = FALSE)
-plot.lmertree2(lt2, which = "tree.coef")
-
-## When tree depth = 1
-lt3 <- lmertree(depression ~ treatment + age | cluster | anxiety + duration,
-  data = DepressionDemo, maxdepth = 1L)
-plot.lmertree2(lt3, which = "tree.coef")
-
-## When local lm is intercept-only:
-lt4 <- lmertree(depression ~ 1 | cluster | anxiety + duration,
-  data = DepressionDemo, alpha = .4, maxdepth = 2L)
-plot.lmertree2(lt4, which = "tree.coef")
-lt5 <- lmertree(depression ~ 1 | cluster | anxiety + duration,
-  data = DepressionDemo, maxdepth = 1L)
-plot.lmertree2(lt5, which = "tree.coef")
-
-## When global fixef are specified:
-lt6 <- lmertree(depression ~ treatment | (age + (1|cluster)) | anxiety + duration,
-  data = DepressionDemo)
-plot.lmertree2(lt6, which = "tree.coef")
-lt7 <- lmertree(depression ~ treatment | (age + (1|cluster)) | anxiety + duration,
-  data = DepressionDemo, maxdepth = 1L)
-plot.lmertree2(lt7, which = "tree.coef")
+plot.lmertree2(lt, which = "tree.coef")
 ```
 
-Testing glmertrees:
+
+### Warning when global fixef are specified
 
 ```{r}
-## Default:
-gt1 <- glmertree(depression_bin ~ treatment + age | cluster | anxiety + duration,
-  data = DepressionDemo, family = binomial)
-plot.glmertree2(gt1, which = "tree.coef")
-plot.glmertree2(gt1, which = "ranef")
-
-## No error bars when joint = FALSE:
-gt2 <- glmertree(depression_bin ~ treatment + age | cluster | anxiety + duration,
-  data = DepressionDemo, joint = FALSE, family = binomial, verbose = TRUE)
-plot.glmertree2(gt2, which = "tree.coef")
-## CHECK CONVERGENCE!
-
-## When tree depth = 1
-gt3 <- glmertree(depression_bin ~ treatment + age | cluster | anxiety + duration,
-  data = DepressionDemo, maxdepth = 1L, family = binomial)
-plot.glmertree2(gt3, which = "tree.coef")
-
-## When local lm is intercept-only:
-gt4 <- glmertree(depression_bin ~ 1 | cluster | anxiety + duration,
-  data = DepressionDemo, alpha = .9, maxdepth = 2L, family = binomial)
-plot.glmertree2(gt4, which = "tree.coef")
-gt5 <- glmertree(depression_bin ~ 1 | cluster | anxiety + duration,
-  data = DepressionDemo, maxdepth = 1L, family = binomial)
-plot.glmertree2(gt5, which = "tree.coef")
-
-## With global fixed effects: 
-gt6 <- glmertree(depression_bin ~ treatment | (age + (1|cluster)) | anxiety + duration,
-  data = DepressionDemo, family = binomial)
-plot.glmertree2(gt6, which = "tree.coef")
-gt7 <- glmertree(depression_bin ~ treatment | (age + (1|cluster)) | anxiety + duration,
-  data = DepressionDemo, maxdepth = 1L, family = binomial)
-plot.glmertree2(gt7, which = "tree.coef")
-
+lt <- lmertree(depression ~ treatment | (age + (1|cluster)) | anxiety + duration,
+  data = DepressionDemo)
+plot.lmertree2(lt, which = "tree.coef")
 ```
-
-

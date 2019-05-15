@@ -40,7 +40,7 @@ Plotting coefficients without tree structure
 ### Default settings
 
 ``` r
-lt <- lmertree(depression ~ treatment + age | cluster | anxiety + duration,
+lt <- lmertree(depression ~ treatment*age | cluster | anxiety + duration,
   data = DepressionDemo)
 plot.lmertree2(lt, which = "tree.coef")
 ```
@@ -58,7 +58,7 @@ plot.lmertree2(lt, which = "ranef")
 ### No error bars when joint = FALSE
 
 ``` r
-lt <- lmertree(depression ~ treatment + age | cluster | anxiety + duration,
+lt <- lmertree(depression ~ treatment*age | cluster | anxiety + duration,
   data = DepressionDemo, joint = FALSE)
 ```
 

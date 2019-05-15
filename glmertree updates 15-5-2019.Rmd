@@ -35,17 +35,14 @@ Here, estimation converged normally.
 `coef` and `fixef` methods now have an additional argument: `which`:
  
 ```{r}
-## fit LMM tree with local fixed effects only
-lt <- lmertree(depression ~ treatment + age | cluster | anxiety + duration,
-  data = DepressionDemo)
-coef(lt)
-
 ## fit LMM tree including both local and global fixed effect
 lt <- lmertree(depression ~ treatment | (age + (1|cluster)) | anxiety + duration,
   data = DepressionDemo)
-coef(lt, which = "tree")
+coef(lt, which = "tree") # default
 coef(lt, which = "global")
 ```
+
+Also, they have an argument `drop`, which is `FALSE`, by default. It was somewhat easier to always have a matrix of coefficients returned, with a row for every terminal node and a column for every local fixed effect.
 
 Separate documentation for these methods has now been included and can be accessed through any of the following commands:
 
@@ -57,22 +54,17 @@ Separate documentation for these methods has now been included and can be access
 ``` 
 
 
-## Plotting coefficients without tree
 
-Issue: The confidence intervals (CIs) are now calculated by taking $\pm 1.96 \times SE$ from the `(g)lmer` estimates. This is not a valid CI, but does give a measure of variability. I have pointed this out in the Details section of the help file, but many users may not read this. Should this be pointed out in other ways / places (e.g., print warning when coefficients are plotted?). In addition, using 1.96 may add additional optimism to these CIs. Should use $t$ values? Or plot error bars with coefficient estimates $\pm 1 \times SE$ (though this may be confusing, as the error bars of the `ranef` plots (from **`lme4`**) also use $\pm 1.96 \times SE$)?
+
+## Plotting coefficients without tree structure
+
+Issue: The confidence intervals (CIs) are now calculated by taking $\pm 1.96 \times SE$ from the `(g)lmer` estimates. This is not a valid CI, but does give a measure of variability. I have pointed this out in the Details section of the help file, but many users may not read this. Should we point this out out in other ways / places (e.g., print warning when coefficients are plotted)? In addition, using a $z$ value of 1.96 may add additional optimism to these CIs. Should use $t$ values? Or plot error bars with coefficient estimates $\pm 1 \times SE$ (though this may be confusing, as the error bars of the `ranef` plots (from **`lme4`**) also use $\pm 1.96 \times SE$)?
 
 Issue: Because of the default treatment contrast coding, the intercepts of all terminal nodes, except the first, are the sum of the overal intercept and the terminal nodes' intercepts. 
 
 Issue: If `joint = FALSE`, how should standard errors be computed? Current default is to omit error bars if `joint = FALSE`. Alternatively, we could base them on the standard errors of the node-specific `(g)lm`s (I would expect these to have a downward bias). We could base them on the standard errors of the `(g)lmer`, which are also not really correct. Or we could keep the current default of not plotting them, and perhaps print a warning (if `joint=FALSE` and coefficients are plotted).
 
 ```{r}
-#Check what happens when 
-#- joint = TRUE vs FALSE
-#- tree has size 1
-#- local_lm is intercept only
-#- global lm effects are estimated
-#- ranef/global model is only cluster indicator
-
 ## Default:
 lt1 <- lmertree(depression ~ treatment + age | cluster | anxiety + duration,
   data = DepressionDemo)
@@ -89,18 +81,18 @@ lt3 <- lmertree(depression ~ treatment + age | cluster | anxiety + duration,
   data = DepressionDemo, maxdepth = 1L)
 plot.lmertree2(lt3, which = "tree.coef")
 
-## When local lm is intercept-only (GOES WRONG A BIT):
-#lt4 <- lmertree(depression ~ 1 | cluster | anxiety + duration,
-#  data = DepressionDemo, alpha = .4, maxdepth = 2L)
-#plot.lmertree2(lt4, which = "tree.coef")
-#lt5 <- lmertree(depression ~ 1 | cluster | anxiety + duration,
-#  data = DepressionDemo, maxdepth = 1L)
-#plot.lmertree2(lt5, which = "tree.coef")
+## When local lm is intercept-only:
+lt4 <- lmertree(depression ~ 1 | cluster | anxiety + duration,
+  data = DepressionDemo, alpha = .4, maxdepth = 2L)
+plot.lmertree2(lt4, which = "tree.coef")
+lt5 <- lmertree(depression ~ 1 | cluster | anxiety + duration,
+  data = DepressionDemo, maxdepth = 1L)
+plot.lmertree2(lt5, which = "tree.coef")
 
+## When global fixef are specified:
 lt6 <- lmertree(depression ~ treatment | (age + (1|cluster)) | anxiety + duration,
   data = DepressionDemo)
 plot.lmertree2(lt6, which = "tree.coef")
-
 lt7 <- lmertree(depression ~ treatment | (age + (1|cluster)) | anxiety + duration,
   data = DepressionDemo, maxdepth = 1L)
 plot.lmertree2(lt7, which = "tree.coef")
@@ -126,15 +118,15 @@ gt3 <- glmertree(depression_bin ~ treatment + age | cluster | anxiety + duration
   data = DepressionDemo, maxdepth = 1L, family = binomial)
 plot.glmertree2(gt3, which = "tree.coef")
 
-## When local lm is intercept-only (GOES WRONG A BIT):
-#gt4 <- glmertree(depression_bin ~ 1 | cluster | anxiety + duration,
-#  data = DepressionDemo, alpha = .9, maxdepth = 2L, family = binomial)
-#plot.glmertree2(gt4, which = "tree.coef")
-#gt5 <- glmertree(depression_bin ~ 1 | cluster | anxiety + duration,
-#  data = DepressionDemo, maxdepth = 1L, family = binomial)
-#plot.glmertree2(gt5, which = "tree.coef")
+## When local lm is intercept-only:
+gt4 <- glmertree(depression_bin ~ 1 | cluster | anxiety + duration,
+  data = DepressionDemo, alpha = .9, maxdepth = 2L, family = binomial)
+plot.glmertree2(gt4, which = "tree.coef")
+gt5 <- glmertree(depression_bin ~ 1 | cluster | anxiety + duration,
+  data = DepressionDemo, maxdepth = 1L, family = binomial)
+plot.glmertree2(gt5, which = "tree.coef")
 
-## With global lm vars 
+## With global fixed effects: 
 gt6 <- glmertree(depression_bin ~ treatment | (age + (1|cluster)) | anxiety + duration,
   data = DepressionDemo, family = binomial)
 plot.glmertree2(gt6, which = "tree.coef")

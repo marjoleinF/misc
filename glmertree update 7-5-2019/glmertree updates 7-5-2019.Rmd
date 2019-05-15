@@ -62,6 +62,7 @@ long_coefs <- data.frame(stack(data.frame(coefs)),
                          node = rep(paste("node", rownames(coefs)), 
                                     times = ncol(coefs)))
 lattice::dotplot(node ~ values | ind, data = long_coefs, as.table=TRUE, 
+                 scales = list(x = list(relation = "free")),
                  xlab = "Estimated coefficients",
                  main = "Fixed effects from tree")
 ```

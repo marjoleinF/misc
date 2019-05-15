@@ -171,6 +171,7 @@ long_coefs <- data.frame(stack(data.frame(coefs)),
                          node = rep(paste("node", rownames(coefs)), 
                                     times = ncol(coefs)))
 lattice::dotplot(node ~ values | ind, data = long_coefs, as.table=TRUE, 
+                 scales = list(x = list(relation = "free")),
                  xlab = "Estimated coefficients",
                  main = "Fixed effects from tree")
 ```
@@ -215,6 +216,10 @@ plot.lmertree2(lt.growth, fitmean = "marginal", which = "tree",
                main = 'fitmean = "marginal" (default behavior)')
 ```
 
+    ## Warning in plot.lmertree2(lt.growth, fitmean = "marginal", which =
+    ## "tree", : Global fixed effects coefficients were estimated, but will not be
+    ## plotted.
+
 ![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-9-1.png)
 
 ``` r
@@ -222,11 +227,19 @@ plot.lmertree2(lt.growth, fitmean = "none", which = "tree",
                main = 'fitmean = "none"')
 ```
 
+    ## Warning in plot.lmertree2(lt.growth, fitmean = "none", which = "tree", main
+    ## = "fitmean = \"none\""): Global fixed effects coefficients were estimated,
+    ## but will not be plotted.
+
 ![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
 ``` r
 plot.lmertree2(lt.growth, fitmean = "combined", which = "tree",
                main = 'fitmean = "combined"')
 ```
+
+    ## Warning in plot.lmertree2(lt.growth, fitmean = "combined", which =
+    ## "tree", : Global fixed effects coefficients were estimated, but will not be
+    ## plotted.
 
 ![](glmertree_updates_7-5-2019_files/figure-markdown_github/unnamed-chunk-11-1.png)

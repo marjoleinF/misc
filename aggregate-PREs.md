@@ -1,8 +1,5 @@
-Load library **`pre`**:
-
-``` r
-library("pre")
-```
+Create datasets
+===============
 
 Prepare original dataset:
 
@@ -19,6 +16,9 @@ datasets <- list()
 for (i in 1:5) datasets[[i]] <- airq[sample(1:nrow(airq), nrow(airq)*.8),]
 ```
 
+Create function to fit PREs to multiple datasets
+================================================
+
 Create a function that fits PREs to several datasets contained in a
 list:
 
@@ -30,9 +30,23 @@ pre.agg <- function(datasets, ...) {
   }
   result
 }
+```
+
+Load library **`pre`**:
+
+``` r
+library("pre")
+```
+
+Illustrate new function:
+
+``` r
 set.seed(43)
 airq.agg <- pre.agg(datasets, formula = Ozone ~ ., family = "binomial")
 ```
+
+Create print and summary methods
+================================
 
 Create and illustrate `print` and `summary` methods (we can use ellipsis
 (`...`) to pass arguments to `print.pre` and `summary.pre`):
@@ -166,6 +180,9 @@ predict.agg <- function(object, newdata, ...) {
 }
 ```
 
+Create predict method
+=====================
+
 Return predictions on the scale of the linear predictor (default in
 `predict.pre`):
 
@@ -257,6 +274,9 @@ cor(exp(lin_preds) / (1 + exp(lin_preds)), prob_preds)
 ```
 
     ## [1] 0.9999314
+
+Create coef method
+==================
 
 Create and illustrate `coef` method:
 

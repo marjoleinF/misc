@@ -1,7 +1,0 @@
-DepressionDemo          Artificial depression treatment dataset
-GrowthCurveDemo         Artificial dataset for partitioning of linear
-                        growth curve models
-MHserviceDemo           Artificial mental-health service outcomes
-                        dataset
-glmertree               (Generalized) Linear Mixed Model Trees
-plot.glmertree2         Plotting (Generalized) Linear Mixed Model Trees
